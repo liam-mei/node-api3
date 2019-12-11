@@ -39,7 +39,7 @@ router.get("/:id", validateUserId, (req, res) => {
   userDb
     .getById(id)
     .then(user => res.status(200).json(user))
-    .catch(err => res.status(500).json({ err, errMessage: "error receving users" }));
+    .catch(err => res.status(500).json({ err, errMessage: "error receiving users" }));
 });
 
 router.get("/:id/posts", validateUserId, (req, res) => {
