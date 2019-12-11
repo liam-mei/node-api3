@@ -10,7 +10,7 @@ const server = express();
 server.use(express.json());
 server.use(helmet());
 // server.use(morgan('dev'));
-// server.use(logger);
+server.use(logger);
 
 // Routing
 server.use("/api/users", userRouter);
@@ -25,7 +25,8 @@ server.get("/", (req, res) => {
 //this middleware runs on every request made to the API
 
 function logger(req, res, next) {
-  // console.log("req obj: ", req);
+  console.log(`METHOD: ${req.method}, URL: ${req.url}, TIMESTAMP: ${Date.now()}`);
+  next();
 }
 
 module.exports = server;
