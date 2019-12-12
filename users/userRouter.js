@@ -80,7 +80,11 @@ function validateUserId(req, res, next) {
     // cancel the request and respond with status 400 and { message: "missing required name field" }
 function validateUser(req, res, next) {
   // do your magic!
-  
+  const { name } = req.body;
+  // Body is always defined so I don't know why we're testing for this
+  if (!req.body) return res.status(400).json({ message: "missing user data" });
+  if (!name) return res.status(400).json({ message: "missing required name field" });
+  next();
 }
 
 // validatePost validates the body on a request to create a new post
