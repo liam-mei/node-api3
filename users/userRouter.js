@@ -1,5 +1,6 @@
 const express = require("express");
 const userDb = require("./userDb");
+const postDb = require("../posts/postDb");
 
 const router = express.Router();
 
@@ -16,8 +17,12 @@ router.post("/", validateUser, (req, res) => {
     });
 });
 
-router.post("/:id/posts", (req, res) => {
+router.post("/:id/posts", [validatePost, validateUserId], (req, res) => {
   // post a post with userId
+  postDb
+    .insert({ user_id: req.params.id, text: req.body.text })
+    .then(post => res.json(post))
+    .catch(err => res.status(500).json(err));
 });
 
 router.get("/", (req, res) => {
@@ -37,16 +42,28 @@ router.get("/:id", validateUserId, (req, res) => {
     .catch(err => res.status(500).json({ err, errMessage: "error receving users" }));
 });
 
-router.get("/:id/posts", (req, res) => {
+router.get("/:id/posts", validateUserId, (req, res) => {
   // get all posts of userId
+  userDb
+    .getUserPosts(req.params.id)
+    .then(posts => res.json(posts))
+    .catch(err => res.status(500).json(err));
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateUserId, (req, res) => {
   // delete user with id
+  userDb
+    .remove(req.params.id)
+    .then(() => res.json({ message: "user successfully Deleted", user: req.user }))
+    .catch(err => res.status(500).json({ errorMessage: "error removing user", err }));
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", validateUser, validateUserId, (req, res) => {
   // update user with id
+  userDb
+    .update(req.params.id, req.body)
+    .then(() => res.json({ message: "user successfully updated" }))
+    .catch(err => res.status(500).json(err));
 });
 
 //custom middleware
@@ -56,7 +73,6 @@ router.put("/:id", (req, res) => {
 // if the id parameter does not match any user id in the database,
 //    cancel the request and respond with status 400 and { message: "invalid user id" }
 function validateUserId(req, res, next) {
-  // do your magic!
   const { id } = req.params;
   userDb
     .getById(id)
@@ -69,17 +85,15 @@ function validateUserId(req, res, next) {
       }
     })
     .catch(err => {
-      console.log("get user by id err:", err);
-      return res.status(400).json({ message: "Error Retrieving User" });
+      res.status(400).json({ message: "Error Retrieving User" });
     });
 }
 
 // validateUser validates the body on a request to create a new user
 // if the request body is missing, cancel the request and respond with status 400 and { message: "missing user data" }
 // if the request body is missing the required name field,
-    // cancel the request and respond with status 400 and { message: "missing required name field" }
+// cancel the request and respond with status 400 and { message: "missing required name field" }
 function validateUser(req, res, next) {
-  // do your magic!
   const { name } = req.body;
   // Body is always defined so I don't know why we're testing for this
   if (!req.body) return res.status(400).json({ message: "missing user data" });
@@ -90,9 +104,14 @@ function validateUser(req, res, next) {
 // validatePost validates the body on a request to create a new post
 // if the request body is missing, cancel the request and respond with status 400 and { message: "missing post data" }
 // if the request body is missing the required text field,
-    // cancel the request and respond with status 400 and { message: "missing required text field" }
+// cancel the request and respond with status 400 and { message: "missing required text field" }
 function validatePost(req, res, next) {
-  // do your magic!
+  const { text } = req.body;
+  // Body is always defined so I don't know why we're testing for this
+  if (!req.body) return res.status(400).json({ message: "missing user data" });
+  if (!text) return res.status(400).json({ message: "missing required text field" });
+  console.log("post validated");
+  next();
 }
 
 module.exports = router;

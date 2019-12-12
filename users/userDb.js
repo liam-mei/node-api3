@@ -14,7 +14,7 @@ function get() {
 }
 
 function getById(id) {
-  db("users")
+  return db("users")
     .where({ id })
     .first();
 }
