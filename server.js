@@ -21,18 +21,18 @@ server.get("/", (req, res) => {
 });
 
 server.use((err, req, res, next) => {
-  console.log(err)
+  console.log(err);
   res.status(500).json({
     message: "An error occurred, please try again later."
-  })
-})
+  });
+});
 
 //custom middleware
 //logger logs to the console the following information about each request: request method, request url, and a timestamp
 //this middleware runs on every request made to the API
 
 function logger(req, res, next) {
-  console.log(`METHOD: ${req.method}, URL: ${req.url}, TIMESTAMP: ${Date.now()}`);
+  console.log(`METHOD: ${req.method}, URL: ${req.url}, TIMESTAMP: ${new Date().toDateString()}`);
   next();
 }
 
